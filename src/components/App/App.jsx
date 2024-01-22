@@ -1,29 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { nanoid } from 'nanoid';
 
 import css from './App.module.css';
 
-import { ContactForm } from './contactForm/contactForm';
-import { Filter } from './filter/filter';
-import { ContactList } from './contactList/contactList';
+import { ContactForm } from '../contactForm/contactForm';
+import { Filter } from '../filter/filter';
+import { ContactList } from '../contactList/contactList';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact,removeContact} from '../../redux/contacts/contactsSlice';
+import { setFilter } from '../../redux/filter/filterSlice';
 
 export const App = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(store => store.contacts.contacts);
+  const filter = useSelector(store => store.filter.filter);
   
-  const [filter, setFilter] = useState('');
-  const [contacts, setContacts] = useState([{ id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },]);
+  // const [contacts, setContacts] = useState([{ id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  //     { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  //     { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  //     { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },]);
 
-useEffect(() => {
-  const contacts = window.localStorage.getItem('contacts');
-  if (contacts) {
-    setContacts(JSON.parse(contacts));
-  }
-}, []);
-  useEffect(() => {
-    window.localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
   
 
   const handleAddedContact = formData => {
@@ -42,15 +39,19 @@ useEffect(() => {
       ...formData,
       id: nanoid(5),
     };
-    setContacts(prevContacts => [...prevContacts, newContact]);
+    const action = addContact(newContact);
+    dispatch(action);
   };
 
-  const handleFilterChange = e => {
-    setFilter(e.target.value);
+  const handleFilterChange = event => {
+    const value = event.target.value;
+    const action = setFilter(value);
+    dispatch(action);
   };
 
   const handleDeleteBtnClick = contactId => {
-    setContacts(prevContacts => prevContacts.filter(({ id }) => id !== contactId));
+    const action = removeContact(prevContacts => prevContacts.filter(({ id }) => id !== contactId));
+    dispatch(action);
   };
     const filteredContacts = contacts.filter(({ name }) =>
       name.toLowerCase().includes(filter.trim().toLowerCase())
